@@ -18,9 +18,9 @@ Put the discordance code into the repository, doesn't matter how (`mv` or copy p
 
 NOTE: you may have to do some configuring here (git may prompt you to add your email, for example I had to do `git config --global user.email "jhcipar@gmail.com"`) and authorize through your browser
 
-Enter `git add .`
-Enter `git commit -m 'initial commit'`
-Enter `git push -u origin add_discordance_code`
+- Enter `git add .`
+- Enter `git commit -m 'initial commit'`
+- Enter `git push -u origin add_discordance_code`
 
 
 ### Git setup
