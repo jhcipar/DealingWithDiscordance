@@ -16,9 +16,12 @@ Enter `git checkout -b 'add_discordance_code'`
 
 Put the discordance code into the repository, doesn't matter how (`mv` or copy paste in VSCode) or just make an experimental change if you want to test this out (you can make a text file or something)
 
+NOTE: you may have to do some configuring here (git may prompt you to add your email, for example I had to do `git config --global user.email "jhcipar@gmail.com"`) and authorize through your browser
+
 Enter `git add .`
 Enter `git commit -m 'initial commit'`
-Enter `git push -u origin main`
+Enter `git push -u origin add_discordance_code`
+
 
 ### Git setup
 https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
