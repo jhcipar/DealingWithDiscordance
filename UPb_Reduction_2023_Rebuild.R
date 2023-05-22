@@ -91,7 +91,7 @@ Data.reduction              <- data.frame( Data.reduction,
                                            GROUP = c( rep( 1:( nfiles - 1 ), each = Number ), 
                                                       rep( nfiles, times = nrow( Data.reduction ) - 
                                                              ( as.integer( Number * ( nfiles - 1 ) ) ) ) ) )
-head(Data.reduction)
+# head(Data.reduction)
 
 ### force numeric for Data.reduction
 ## force numeric
@@ -140,31 +140,36 @@ DiscGridTableFinal$ID   <- seq(1, nrow(DiscGridTableFinal), 1)
 Disclines               <- nrow( DiscGridTableFinal )    
 
 ## Trying to speed up by not looping as much
-bigdata              <- by( Data.reduction[, 1:7], Data.reduction$GROUP, BigFunction )
+bigdata <- by(Data.reduction[, 1:7], Data.reduction$GROUP, BigFunction)
 
-splitfun   <- function(x) {
+splitfun <- function(x) {
   bigdata[[x]]$Likelihood
 }
 
-for ( i in 1:nfiles ) {
-  assign( paste( "res", i ), as.data.frame( splitfun( i ) ) )
+# Create a list to store the results
+res_list <- vector("list", nfiles)
+
+for (i in 1:nfiles) {
+  res_list[[i]] <- splitfun(i)
 }
 
 
-likelis               <- do.call( cbind, lapply( paste("res", 1:nfiles, sep =" "), get ) )
-totallikelihood       <- apply( likelis, 1, sum, na.rm = T ) 
+# Convert the list of results to a data frame
+likelis <- as.data.frame(do.call(cbind, res_list))
+
+# Calculate the row-wise sum of likelis (across columns)
+totallikelihood <- rowSums(likelis, na.rm = TRUE)
+
 Resultdisc            <- cbind( bigdata$`1`[, 1:5 ], as.data.frame( totallikelihood ) )
-colnames(Resultdisc)  <- c("ID", "Slope", "Yintercept", "Lower Intercept", "Upper Intercept", 
-                           "Likelihood")
-normalized            <- Resultdisc [, "Likelihood"] / datapoints
-Resultdisc            <- cbind(Resultdisc, normalized)
+
+Resultdisc$normalized            <- Resultdisc [, "totallikelihood"] / datapoints
 upperdisc             <- aggregate (Resultdisc$normalized, 
-                                    by = list (Resultdisc [, "Upper Intercept"]), max)
-colnames(upperdisc)   <- c("Upper Intercept", "Likelihood")
+                                    by = list (Resultdisc$upper.intercept), max)
+colnames(upperdisc)   <- c("upper.intercept", "totallikelihood")
 
 lowerdisc             <- aggregate (Resultdisc$normalized, 
-                                    by = list(Resultdisc[, "Lower Intercept"]), max)
-colnames(lowerdisc)   <- c("Lower Intercept", "Likelihood")
+                                    by = list(Resultdisc[, "lower.intercept"]), max)
+colnames(lowerdisc)   <- c("lower.intercept", "totallikelihood")
 # rm(likelis, grouping, bigdata, data.split)
 
 
@@ -180,7 +185,7 @@ write.table(Resultdisc, file = paste(sample.name, "Results.csv"), row.names = FA
 # Stop the clock
 runtime = proc.time() - ptm
 runfile  <- matrix( c( "Data set Title", sample.name, "Data points", datapoints,
-                       "Node Spacing (Myr)", node.spacing, "Number of gridlines", Discline,
+                       "Node Spacing (Myr)", node.spacing, "Number of gridlines", NA,
                        "206/238 Bandwidth", NA,
                        "207/235 Bandwidth", NA,
                        "Run time (sec)", runtime[ 3 ] ), 7, 2, byrow = TRUE )

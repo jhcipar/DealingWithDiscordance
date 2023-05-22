@@ -171,7 +171,7 @@ server <- function(input, output, session) {
   #set up things from other files in the git hub
    source( "UPb_Constants_Functions_Libraries.R", local = TRUE )   # Read in constants and functions from the other file
    source( "fte_theme_plotting.R", local = TRUE  )   	# Read in constants and functions from the other file
-   source( "UPb_Reduction_EJS.R" , local = TRUE )  ## do the reduction
+   source( "UPb_Reduction_2023_Rebuild.R" , local = TRUE )  ## do the reduction
    source( "UPb_Plotting_Exporting_Older.R" , local = TRUE ) #For the plotting functions
    
    

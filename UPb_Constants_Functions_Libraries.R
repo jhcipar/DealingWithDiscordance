@@ -28,10 +28,10 @@ aff            <- function(x1, y1, x2, y2)  {(y2 - y1)/(x2 - x1)
 }
 bff            <- function(x1, y1, x2, y2)  {y2 - x2*(y2 - y1)/(x2 - x1)
 }
-afff           <- function(t1, t2) {aff(exp(Lambda235 * t1) - 1, exp(Lambda238 * t1) - 1,
+slope.function           <- function(t1, t2) {aff(exp(Lambda235 * t1) - 1, exp(Lambda238 * t1) - 1,
 										exp(Lambda235 * t2) - 1, exp(Lambda238 * t2) - 1)
 }
-bfff           <- function(t1, t2) {bff(exp(Lambda235 * t1) - 1, exp(Lambda238 * t1) - 1,
+intercept.function           <- function(t1, t2) {bff(exp(Lambda235 * t1) - 1, exp(Lambda238 * t1) - 1,
 										exp(Lambda235 * t2) - 1, exp(Lambda238 * t2) - 1)
 }
 

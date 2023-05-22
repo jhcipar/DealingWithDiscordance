@@ -52,8 +52,7 @@ Data.concordia <-  data.frame(
 	sigma68 = Data.new$sigma68, 
 	rho = Data.new$rho
 	)
-data.concordia.plot <- read.data( Data.concordia, ierr = 1,
-								  method = 'U-Pb', format = 1 )
+
 
 
 ## Back to old code
