@@ -10,12 +10,12 @@ r              <- rf(32)
 
 
 
-fig.conc   <- function() {
-	concordia( x = data.concordia.plot,
-			   ellipse.fill = c( "#4D4D4D60", "#FF000025"), 
-			   ellipse.stroke = c( "#4D4D4D15"),
-			   concordia.col = "grey20" )
-}
+#fig.conc   <- function() {
+#	concordia( x = data.concordia.plot,
+#			   ellipse.fill = c( "#4D4D4D60", "#FF000025"), 
+#			   ellipse.stroke = c( "#4D4D4D15"),
+#			   concordia.col = "grey20" )
+#}
 
 fig.2dhist  <- function() {
 	ggplot( data = Resultdisc, aes( x =`Upper Intercept` / 1e6,
