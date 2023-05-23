@@ -1,7 +1,7 @@
 #### UPb Plotting code from the older version
 ## EXTRA PLOTTING CODE
 Title    <- paste(sample.name, "\nn =", datapoints, "\nNode Spacing (myr) =", Tstep/1000000)
-res1     <- reshape2::dcast(Resultdisc, `Upper Intercept` ~ `Lower Intercept`, 
+res1     <- reshape2::dcast(Resultdisc, upper.intercept ~ lower.intercept, 
 				  value.var = "normalized")[-1]
 res2     <- as.matrix(res1)
 rf       <- colorRampPalette(c("White", "grey85", "tan1", "darkorange", "royalblue1", "royalblue4" ),
@@ -18,8 +18,8 @@ r              <- rf(32)
 #}
 
 fig.2dhist  <- function() {
-	ggplot( data = Resultdisc, aes( x =`Upper Intercept` / 1e6,
-									y = `Lower Intercept`/ 1e6 ) ) +
+	ggplot( data = Resultdisc, aes( x =upper.intercept / 1e6,
+									y = lower.intercept/ 1e6 ) ) +
     fte_theme_white() +
 		xlim( upperint.plotlimit.min, upperint.plotlimit.max ) +
 		ylim( lowerint.plotlimit.min, lowerint.plotlimit.max ) +
@@ -31,8 +31,8 @@ fig.2dhist  <- function() {
 }
 
 fig.xyplot  <- function() {
-	ggplot( data = lowerdisc, aes ( x = `Lower Intercept` / 1e6, 
-									y = `Likelihood` ) ) +
+	ggplot( data = lowerdisc, aes ( x = lower.intercept / 1e6, 
+									y = normalized ) ) +
 		labs( title = paste( "Sample =", sample.name ),
 			  subtitle = "blue = upper, green = lower" ) +
 		xlim( min( upperint.plotlimit.min,lowerint.plotlimit.min ),
@@ -42,13 +42,13 @@ fig.xyplot  <- function() {
     fte_theme_white() +
 		geom_line( color = viridis(5)[ 4 ], size = 1.5 ) +
 		geom_line( data = upperdisc, 
-				   aes ( x = `Upper Intercept` / 1e6, 
-				   	  y = `Likelihood` ), color = viridis(5)[ 2 ], 
+				   aes ( x = upper.intercept / 1e6, 
+				   	  y = normalized ), color = viridis(5)[ 2 ], 
 				   size = 1.5 ) 
 }
 
 fig.total.lower.int  <- function() {
-  ggplot( data = lowerdisc.sum.total, aes ( x = `Lower Intercept` / 1e6, 
+  ggplot( data = lowerdisc.sum.total, aes ( x = lower.intercept / 1e6, 
                                   y = normalized.sum.likelihood ) ) +
     labs( title = paste( "Sample =", sample.name ) ) +
     xlim( lowerint.plotlimit.min, lowerint.plotlimit.max ) +
