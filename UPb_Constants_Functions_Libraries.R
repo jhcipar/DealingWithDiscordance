@@ -49,27 +49,28 @@ Pro  <- function(a, b, Xi, sX, Yi, sY, rho, disc) { abs(disc) * (1 / (2 * pi * s
 
 Prob   <- function(p1, p2) {
 	p1 = as.list(p1); p2 = as.list(p2)
-	Pro(p1$Slope, p1$Yintercept, p2$r75, p2$sigma75, p2$r68,
+	Pro(p1$slope, p1$intercept, p2$r75, p2$sigma75, p2$r68,
 		p2$sigma68, p2$rho, p2$discordance)
 }
 
 BigFunction  <- function (x) {
-	Npoint                    <- dim(Data.new)
-	Npoints                   <- (Npoint[1])
+  # x=Data.reduction[, 1:7]
+	Npoint                    <- dim( Data.new )
+	Npoints                   <- ( Npoint[ 1 ] )
 	indexdisc      <- CJ(indexdisc1 = seq( nrow( DiscGridTableFinal )), 
 						 indexdisc2 = seq( nrow( x )))
 	sumdisc        <- indexdisc[,`:=`(resultdisc = Prob( DiscGridTableFinal[indexdisc1, ], 
 														 x[indexdisc2, ]),
 									  Group.1 = rep( seq( nrow( DiscGridTableFinal )), 
 									  			   each = nrow( x )))][,.(sumdisc = sum( resultdisc )),
-									  			   					by = Group.1]
+									  			   					by = Group.1 ]
 	sumdisc                <- as.data.frame( sumdisc )
 	
 	colnames(sumdisc)      <- c("ID", "Likelihood")
-	Resultdisc             <- merge(DiscGridTableFinal, sumdisc, by = "ID", all.x = TRUE)
-	row.names(Resultdisc)  <- seq_len(nrow(Resultdisc))
-	rm(indexdisc, sumdisc)
-	assign(paste("Resultdisc"), Resultdisc)
+	Resultdisc             <- merge( DiscGridTableFinal, sumdisc, by = "ID", all.x = TRUE )
+	row.names(Resultdisc)  <- seq_len( nrow( Resultdisc ) )
+	rm( indexdisc, sumdisc )
+	assign( paste( "Resultdisc" ), Resultdisc )
 }
 
 ## Using ggplot2 for the plotting

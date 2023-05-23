@@ -132,11 +132,16 @@ DiscGridTableFinal$ID   <- seq(1, nrow(DiscGridTableFinal), 1)
 Disclines               <- nrow( DiscGridTableFinal )    
 
 
-bigdata <- by(Data.reduction[, 1:7], Data.reduction$GROUP, BigFunction)
+bigdata <- by( Data.reduction[, 1:7], Data.reduction$GROUP, BigFunction )
 
 splitfun <- function(x) {
   bigdata[[x]]$Likelihood
 }
+
+ggplot( Data.new, aes( x = r75, y = r68 ) ) +
+  geom_point()+
+  geom_abline( slope = DiscGridTableFinal$slope[5], intercept = DiscGridTableFinal$intercept[5] ) +
+  geom_abline( slope = DiscGridTableFinal$slope[215], intercept = DiscGridTableFinal$intercept[215] ) 
 
 # Create a list to store the results
 res_list <- vector("list", nfiles)
