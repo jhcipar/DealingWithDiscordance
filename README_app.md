@@ -9,7 +9,7 @@ Save the following files into a folder with your discordance data -
 1. Shiny_app_discordance.R - this is the app itself
 2. UPb_Constants_Functions_Libraries.R
 3. UPb_Plotting_Exporting_app_source.R
-4. U_Pb_Reduction_EJS.R
+4. U_Pb_Reduction_2023_rebuild.R
 5. fte_them_plotting.R
 
 Next, you need to format your data to be exactly like the "Example_data.csv"
