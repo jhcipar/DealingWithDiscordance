@@ -113,9 +113,9 @@ server <- function(input, output, session) {
       # Generate the plot or perform other functions
       
       # Example: Concordia Diagram
-    data_concordia <- read.data(  data[ , 2:6], ierr = 2,
+    data_concordia <- read.data(  data[ , 2:6], ierr = 1,
                 method = 'U-Pb', format = 1 )
-      concordia(data_concordia, type = 1)
+      concordia( data_concordia, type = 1 )
 
   })
   

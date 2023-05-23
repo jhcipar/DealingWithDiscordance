@@ -16,14 +16,6 @@ maximus       = 75
 # number of data points in each block
 Number        = 25
 
-
-
-
-
-
-
-
-
 ## Don't touch anything below here
 colnames(Data.raw)     <- c( "Spot", "r75", "sigma75", "r68", "sigma68", "rho", "age76")
 Data.new    <- Data.raw
@@ -139,7 +131,7 @@ DiscGridTableFinal <- data.frame( slope = DiscGridTable.slope, intercept = DiscG
 DiscGridTableFinal$ID   <- seq(1, nrow(DiscGridTableFinal), 1)
 Disclines               <- nrow( DiscGridTableFinal )    
 
-## Trying to speed up by not looping as much
+
 bigdata <- by(Data.reduction[, 1:7], Data.reduction$GROUP, BigFunction)
 
 splitfun <- function(x) {
@@ -153,7 +145,6 @@ for (i in 1:nfiles) {
   res_list[[i]] <- splitfun(i)
 }
 
-
 # Convert the list of results to a data frame
 likelis <- as.data.frame(do.call(cbind, res_list))
 
@@ -165,43 +156,23 @@ Resultdisc            <- cbind( bigdata$`1`[, 1:5 ], as.data.frame( totallikelih
 Resultdisc$normalized            <- Resultdisc [, "totallikelihood"] / datapoints
 upperdisc             <- aggregate (Resultdisc$normalized, 
                                     by = list (Resultdisc$upper.intercept), max)
-colnames(upperdisc)   <- c("upper.intercept", "totallikelihood")
+colnames(upperdisc)   <- c("upper.intercept", "likelihood")
 
-lowerdisc             <- aggregate (Resultdisc$normalized, 
-                                    by = list(Resultdisc[, "lower.intercept"]), max)
-colnames(lowerdisc)   <- c("lower.intercept", "totallikelihood")
+
+lowerdisc             <- aggregate( Resultdisc$normalized, 
+                                    by = list(Resultdisc$lower.intercept), max)
+colnames(lowerdisc)   <- c( "lower.intercept", "totallikelihood")
+
+## Calculate the number of lines that have a given lower intercept age
+lowerdisc.sum.total   <- aggregate( Resultdisc$normalized, 
+                                    by = list(Resultdisc$lower.intercept), sum )
+colnames( lowerdisc.sum.total )   <- c("lower.interceptt", "totallikelihood")
+lowerdisc.sum.total$n.lines <-  aggregate( Resultdisc$normalized, 
+                                           by = list(Resultdisc$lower.intercept), length )[ ,2]
+lowerdisc.sum.total$normalized.sum.likelihood <- lowerdisc.sum.total$totallikelihood /
+  lowerdisc.sum.total$n.lines  ## Calculate the Likelihood normalized by the number of lines
+
 # rm(likelis, grouping, bigdata, data.split)
-
-
-write.table(upperdisc, file = paste(sample.name, "upper intercept.csv"), row.names = FALSE,
-            quote = FALSE, sep = ",")
-
-write.table(lowerdisc, file = paste(sample.name, "lower intercept.csv"), row.names = FALSE,
-            quote = FALSE, sep = ",")
-
-write.table(Resultdisc, file = paste(sample.name, "Results.csv"), row.names = FALSE,
-            quote = FALSE, sep = ",")
-
-# Stop the clock
-runtime = proc.time() - ptm
-runfile  <- matrix( c( "Data set Title", sample.name, "Data points", datapoints,
-                       "Node Spacing (Myr)", node.spacing, "Number of gridlines", NA,
-                       "206/238 Bandwidth", NA,
-                       "207/235 Bandwidth", NA,
-                       "Run time (sec)", runtime[ 3 ] ), 7, 2, byrow = TRUE )
-if( normalize.uncertainty == "Y" ) {
-	runfile[ 12 ] = sigma68mean
-	runfile[ 13 ] = sigma75mean
-}
-
-colnames(runfile)    <- c( "Information", "This run")
-
-setwd( export.dir ) 
-write.table( runfile, file = paste( sample.name, ".parameters.csv", sep = "" ), row.names = FALSE,
-            col.names = FALSE, quote = FALSE, sep = ",")
-# rm(ages, concordia, pointsA, pointsAA, pointsB, pointsBB, pointsC, pointsCC, ratio68, ratio75,
-#    ratios, res1, res2, xtable, ytable)
-
 
 
 
