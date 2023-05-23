@@ -150,7 +150,7 @@ totallikelihood <- rowSums(likelis, na.rm = TRUE)
 Resultdisc <- cbind(bigdata$`1`[, 1:5], as.data.frame(totallikelihood))
 colnames(Resultdisc) <- c("ID", "Slope", "Yintercept", "Lower Intercept", "Upper Intercept", "Likelihood")
 normalized            <- Resultdisc [, "Likelihood"] / datapoints
-print("results bind2")
+
 Resultdisc            <- cbind(Resultdisc, normalized)
 upperdisc             <- aggregate (Resultdisc$normalized, 
                                     by = list (Resultdisc [, "Upper Intercept"]), max)
