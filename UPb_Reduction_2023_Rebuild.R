@@ -138,10 +138,10 @@ splitfun <- function(x) {
   bigdata[[x]]$Likelihood
 }
 
-ggplot( Data.new, aes( x = r75, y = r68 ) ) +
-  geom_point()+
-  geom_abline( slope = DiscGridTableFinal$slope[5], intercept = DiscGridTableFinal$intercept[5] ) +
-  geom_abline( slope = DiscGridTableFinal$slope[215], intercept = DiscGridTableFinal$intercept[215] ) 
+# ggplot( Data.new, aes( x = r75, y = r68 ) ) +
+#   geom_point()+
+#   geom_abline( slope = DiscGridTableFinal$slope[5], intercept = DiscGridTableFinal$intercept[5] ) +
+#   geom_abline( slope = DiscGridTableFinal$slope[215], intercept = DiscGridTableFinal$intercept[215] ) 
 
 # Create a list to store the results
 res_list <- vector("list", nfiles)
@@ -161,7 +161,7 @@ Resultdisc            <- cbind( bigdata$`1`[, 1:5 ], as.data.frame( totallikelih
 Resultdisc$normalized            <- Resultdisc [, "totallikelihood"] / datapoints
 upperdisc             <- aggregate (Resultdisc$normalized, 
                                     by = list (Resultdisc$upper.intercept), max)
-colnames(upperdisc)   <- c("upper.intercept", "likelihood")
+colnames(upperdisc)   <- c("upper.intercept", "totallikelihood")
 
 
 lowerdisc             <- aggregate( Resultdisc$normalized, 
@@ -171,7 +171,7 @@ colnames(lowerdisc)   <- c( "lower.intercept", "totallikelihood")
 ## Calculate the number of lines that have a given lower intercept age
 lowerdisc.sum.total   <- aggregate( Resultdisc$normalized, 
                                     by = list(Resultdisc$lower.intercept), sum )
-colnames( lowerdisc.sum.total )   <- c("lower.interceptt", "totallikelihood")
+colnames( lowerdisc.sum.total )   <- c("lower.intercept", "totallikelihood")
 lowerdisc.sum.total$n.lines <-  aggregate( Resultdisc$normalized, 
                                            by = list(Resultdisc$lower.intercept), length )[ ,2]
 lowerdisc.sum.total$normalized.sum.likelihood <- lowerdisc.sum.total$totallikelihood /

@@ -32,7 +32,7 @@ fig.2dhist  <- function() {
 
 fig.xyplot  <- function() {
 	ggplot( data = lowerdisc, aes ( x = lower.intercept / 1e6, 
-									y = normalized ) ) +
+									y = totallikelihood ) ) +
 		labs( title = paste( "Sample =", sample.name ),
 			  subtitle = "blue = upper, green = lower" ) +
 		xlim( min( upperint.plotlimit.min,lowerint.plotlimit.min ),
@@ -43,7 +43,7 @@ fig.xyplot  <- function() {
 		geom_line( color = viridis(5)[ 4 ], size = 1.5 ) +
 		geom_line( data = upperdisc, 
 				   aes ( x = upper.intercept / 1e6, 
-				   	  y = normalized ), color = viridis(5)[ 2 ], 
+				   	  y = totallikelihood ), color = viridis(5)[ 2 ], 
 				   size = 1.5 ) 
 }
 
