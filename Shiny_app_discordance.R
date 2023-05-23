@@ -35,6 +35,10 @@ ui <- fluidPage(
           accept = ".csv"
         )
       ),
+      
+
+      
+      #set node spacing
       selectInput(inputId = "node_space", 
                   label = "Node Spacing (ma)", 
                   choices = c("10", 
@@ -44,6 +48,7 @@ ui <- fluidPage(
                   multiple = FALSE,
                   selectize = TRUE),
       
+      #choose plot output
       selectInput(inputId = "plot_shown", 
                   label = "Discordance Plot", 
                   choices = c("Max Probability", 
@@ -87,14 +92,22 @@ server <- function(input, output, session) {
     # Return the data frame
     return(data)
   }
-
+  # Create reactiveValues to store the data
+  dataValues <- reactiveValues(data = NULL)
+  
+  # Define a reactive expression to update the data when necessary
+  observeEvent(input$data_file, {
+    dataValues$data <- loadData()
+  })
+  
+  
 #generate file name
   
   output$my_csv_name <- renderText({ #Output file name
     # Test if file is selected
     if (!is.null(input$data_file$datapath)) {
       # Extract file name (additionally remove file extension using sub)
-      return(print(class(loadData())))
+      return(sub(".csv", "", input$data_file$name))
     } else {
       return(NULL)
     }
@@ -108,7 +121,8 @@ server <- function(input, output, session) {
   
   # Process the user input and generate output plot
   output$output_plot <- renderPlot({
-    data <- loadData()
+    req(dataValues$data)
+    data <- dataValues$data
     
       # Generate the plot or perform other functions
       
@@ -119,11 +133,19 @@ server <- function(input, output, session) {
 
   })
   
+
   #process data and run discordance data 
-  output$Discordance_plot <-renderPlot({
-   data <- loadData()
-   Data.raw <- data
-   
+  
+
+    
+    # Generate the plot based on the stored data
+    output$Discordance_plot <- renderPlot({
+      req(dataValues$data)  # Wait for the data to be available
+      
+      Data.raw <- dataValues$data
+  
+    
+    
   #define variables
    file_name<- input$data_file$name
    sample.name 	<- sub(".csv", "", file_name)
@@ -172,19 +194,20 @@ server <- function(input, output, session) {
    source( "UPb_Constants_Functions_Libraries.R", local = TRUE )   # Read in constants and functions from the other file
    source( "fte_theme_plotting.R", local = TRUE  )   	# Read in constants and functions from the other file
    source( "UPb_Reduction_EJS.R" , local = TRUE )  ## do the reduction
-   source( "UPb_Plotting_Exporting_Older.R" , local = TRUE ) #For the plotting functions
+   source( "UPb_Plotting_Exporting_app_source.R" , local = TRUE ) #For the plotting functions
    
    
   
    if (input$plot_shown == "Max Probability"){
-        fig.xyplot()
+        return(fig.xyplot())
      }
    if (input$plot_shown == "Lower Intercept (summed probability"){
-        fig.total.lower.int()
+        return(fig.total.lower.int())
      }
    if (input$plot_shown == "Heat Map"){
-        fig.2dhist()
+        return(fig.2dhist())
      }
+  
   })
     
   
