@@ -41,6 +41,7 @@ server <- function(input, output) {
     result <- sum(data$ColumnA)
     # Display the result in a plot
     output$plot <- renderPlot(plot(result))
+    test <- 1 + 1
   })
 }
 
