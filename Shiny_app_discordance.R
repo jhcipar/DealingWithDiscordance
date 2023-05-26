@@ -9,7 +9,7 @@ ui <- fluidPage(
       # Option to choose between copy-pasted data and file upload
       selectInput(
         "data_source",
-        label = "Data Source",
+        label = "Data Source Test",
         choices = c("Copy-Paste", "Upload File"),
         selected = "Upload File"
       ),
