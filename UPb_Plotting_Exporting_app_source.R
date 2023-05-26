@@ -18,7 +18,7 @@ r              <- rf(32)
 #}
 
 fig.2dhist  <- function() {
-	ggplot( data = Resultdisc, aes( x =upper.intercept / 1e6,
+return(	ggplot( data = Resultdisc, aes( x =upper.intercept / 1e6,
 									y = lower.intercept/ 1e6 ) ) +
     fte_theme_white() +
 		xlim( upperint.plotlimit.min, upperint.plotlimit.max ) +
@@ -27,11 +27,11 @@ fig.2dhist  <- function() {
 		labs( title = paste( "sample =", sample.name ) ) +
 		xlab( "Upper Intercept Age (Ma)" ) +
 		ylab( "Lower Intercept Age (Ma)" ) +
-		scale_fill_viridis( direction = 1  )
+		scale_fill_viridis( direction = 1  ))
 }
 
 fig.xyplot  <- function() {
-	ggplot( data = lowerdisc, aes ( x = lower.intercept / 1e6, 
+return(	ggplot( data = lowerdisc, aes ( x = lower.intercept / 1e6, 
 									y = totallikelihood ) ) +
 		labs( title = paste( "Sample =", sample.name ),
 			  subtitle = "blue = upper, green = lower" ) +
@@ -44,38 +44,41 @@ fig.xyplot  <- function() {
 		geom_line( data = upperdisc, 
 				   aes ( x = upper.intercept / 1e6, 
 				   	  y = totallikelihood ), color = viridis(5)[ 2 ], 
-				   size = 1.5 ) 
+				   size = 1.5 ))
 }
 
 fig.total.lower.int  <- function() {
-  ggplot( data = lowerdisc.sum.total, aes ( x = lower.intercept / 1e6, 
+  return(ggplot( data = lowerdisc.sum.total, aes ( x = lower.intercept / 1e6, 
                                   y = normalized.sum.likelihood ) ) +
     labs( title = paste( "Sample =", sample.name ) ) +
     xlim( lowerint.plotlimit.min, lowerint.plotlimit.max ) +
     xlab( "Lower Intercept Age (Ma)" ) +
     ylab( expression( paste( "Summed Likelihood (normalized)" ) ) ) +
     fte_theme_white() +
-    geom_line( color = viridis(5)[ 4 ], size = 1.5 ) 
+    geom_line( color = viridis(5)[ 4 ], size = 1.5 ) )
 }
 
 
 
 ## export plots
 #setwd( export.dir )
-if (input$plot_shown == "Heat Map"){
+xy_plot<- fig.xyplot()
+heat_map_plot<- fig.2dhist()
+lower_int_summed <- fig.total.lower.int()
+
       ggsave( filename = c(paste(sample.name, "_2DHistogram.pdf", sep = "" )), plot = fig.2dhist(),
 		width = 10, height = 7, units = c( "in" ) )
-}
 
-if (input$plot_shown == "Max Probability"){
+
+
     ggsave( filename = c(paste(sample.name, "_XYIntercepts.pdf", sep = "" )), plot = fig.xyplot(),
 		width = 10, height = 7, units = c( "in" ) )
-}
 
-if (input$plot_shown == "Lower Intercept (summed probability"){
+
+
     ggsave( filename = c(paste(sample.name, "_lower_int_total.pdf", sep = "" )), plot = fig.total.lower.int(),
         width = 10, height = 7, units = c( "in" ) )
-}
+
 #ggsave( filename = c(paste(sample.name, "_Concordia.pdf", sep = "" )), plot = fig.conc(),
 #		width = 10, height = 7, units = c( "in" ) )
 
