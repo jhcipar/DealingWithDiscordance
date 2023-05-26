@@ -177,7 +177,7 @@ lowerdisc.sum.total$n.lines <-  aggregate( Resultdisc$normalized,
 lowerdisc.sum.total$normalized.sum.likelihood <- lowerdisc.sum.total$totallikelihood /
   lowerdisc.sum.total$n.lines  ## Calculate the Likelihood normalized by the number of lines
 
-# rm(likelis, grouping, bigdata, data.split)
+
 
 
 

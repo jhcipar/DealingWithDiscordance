@@ -2,11 +2,14 @@ library(shiny)
 library(IsoplotR)
 library('cardidates')
 library(dplyr)
+library(reactlog)
+
+reactlog_enable()
+
 
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
-      # Option to choose between copy-pasted data and file upload
       selectInput(
         "data_source",
         label = "Data Source Test",
@@ -14,7 +17,6 @@ ui <- fluidPage(
         selected = "Upload File"
       ),
       
-      # Text input as a table
       conditionalPanel(
         condition = "input.data_source == 'Copy-Paste'",
         textAreaInput(
@@ -26,7 +28,6 @@ ui <- fluidPage(
         )
       ),
       
-      # File upload input
       conditionalPanel(
         condition = "input.data_source == 'Upload File'",
         fileInput(
@@ -36,40 +37,97 @@ ui <- fluidPage(
         )
       ),
       
-
+      actionButton(
+        inputId = "reduce_data",
+        label = "Discordance Reduction"
+      ),
       
-      #set node spacing
-      selectInput(inputId = "node_space", 
-                  label = "Node Spacing (ma)", 
-                  choices = c("10", 
-                              "5",
-                              "1"), 
-                  selected = "10", 
-                  multiple = FALSE,
-                  selectize = TRUE),
+      sliderInput(
+        inputId = "node_space",
+        label = "Node Spacing (ma)",
+        min = 1,
+        max = 50,
+        step = 7,
+        value = 15
+      ),
       
-      #choose plot output
-      selectInput(inputId = "plot_shown", 
-                  label = "Discordance Plot", 
-                  choices = c("Max Probability", 
-                              "Lower Intercept (summed probability",
-                              "Heat Map"), 
-                  selected = "Lower Intercept (max probability)", 
-                  multiple = FALSE,
-                  selectize = TRUE),
+      radioButtons(
+        inputId ="normalize_unc",
+        label = 'Uncertainty normalization',
+        choiceNames = c("Normalized", "Unnormalized"),
+        choiceValues = c('Y', 'N'),
+        selected = "N",
+        inline = TRUE
+      ),
+      
+      radioButtons(
+        inputId ="data_type",
+        label = 'Type of population',
+        choiceNames = c("Detrital (weight against concordance)", "Single (no weighting)"),
+        choiceValues = c('detrital', 'single'),
+        selected = "single",
+        inline = TRUE
+      ),
+      
+      sliderInput(
+        inputId = "start_cut_upper_min",
+        label = "Minimum Upper Intercept Value (Ma)",
+        min = 0,
+        max = 4500,
+        step = 250,
+        value = 0
+      ),
+      
+      sliderInput(
+        inputId = "start_cut_upper_max",
+        label = "Maximum Upper Intercept Value (Ma)",
+        min = 0,
+        max = 4500,
+        step = 250,
+        value = 2000
+      ),
+      
+      sliderInput(
+        inputId = "start_cut_lower_min",
+        label = "Minimum Lower Intercept Value (Ma)",
+        min = 0,
+        max = 4500,
+        step = 250,
+        value = 0
+      ),
+      
+      sliderInput(
+        inputId = "start_cut_lower_max",
+        label = "Maximum Lower Intercept Value (Ma)",
+        min = 0,
+        max = 4500,
+        step = 250,
+        value = 2000
+      )
     ),
     
     mainPanel(
-      # Output plot or other functions
-      textOutput("my_csv_name"), #shows file name
-      plotOutput("output_plot"), #plots concordia diagram
-      plotOutput("Discordance_plot"),
-      
-      # Output table
-      tableOutput("output_table")
+      textOutput("my_csv_name"),  # Shows file name
+      tabsetPanel(
+        # Tab 1: Output table
+        tabPanel("Input Table", tableOutput("output_table")),
+        
+        # Tab 2: Output plot - Concordia Diagram
+        tabPanel("Concordia Plot", plotOutput("output_plot")),
+        
+        #Tab 3: Output plot - Discordance Plot (lower and Upper int)
+        tabPanel("Discordance Plot (Lower and Upper Int.)", plotOutput("Discordance_plot_upper_lower")),
+        
+        # Tab 4: Output plot - Discordance Plot (Lower Summed)
+        tabPanel("Discordance Plot (Lower Int. Summed)", plotOutput("Discordance_plot_lower_summed")),
+        
+        # Tab 5: Output plot - Heatmap 2D Histogram
+        tabPanel("Heatmap 2D Histogram", plotOutput("Discordance_plot_heat_map"))
     )
   )
-)
+))
+
+
 
 
 server <- function(input, output, session) {
@@ -92,18 +150,54 @@ server <- function(input, output, session) {
     # Return the data frame
     return(data)
   }
+  
   # Create reactiveValues to store the data
-  dataValues <- reactiveValues(data = NULL)
+  reducedData <- reactiveValues(data = NULL)
   
   # Define a reactive expression to update the data when necessary
+  #will do reduction as soon as data is in the system
   observeEvent(input$data_file, {
-    dataValues$data <- loadData()
+    # Reduce the data
+    req(input$data_file)
+    Data.raw <- loadData()
+    
+    # Define variables
+    file_name <- input$data_file$name
+    sample.name <- sub(".csv", "", file_name)
+    node.spacing <- as.numeric(input$node_space) # node spacing from drop down
+    
+    source('App_reduction.R', local = TRUE)
+    
+    # Update the reducedData reactiveValues
+    reducedData$data <- list(xy_plot,
+                             heat_map_plot,
+                             lower_int_summed)
+  })
+  
+  #will update data after sliders change and then button is pressed
+  observeEvent(input$reduce_data, {
+    # Reduce the data
+    req(input$data_file)
+    Data.raw <- loadData()
+    
+    # Define variables
+    file_name <- input$data_file$name
+    sample.name <- sub(".csv", "", file_name)
+    node.spacing <- as.numeric(input$node_space) # node spacing from drop down
+    
+    source('App_reduction.R', local = TRUE)
+    
+    # Update the reducedData reactiveValues
+    reducedData$data <- list(xy_plot,
+                             heat_map_plot,
+                             lower_int_summed)
   })
   
   
-#generate file name
   
-  output$my_csv_name <- renderText({ #Output file name
+  
+  # Generate file name
+  output$my_csv_name <- renderText({ # Output file name
     # Test if file is selected
     if (!is.null(input$data_file$datapath)) {
       # Extract file name (additionally remove file extension using sub)
@@ -121,100 +215,44 @@ server <- function(input, output, session) {
   
   # Process the user input and generate output plot
   output$output_plot <- renderPlot({
-    req(dataValues$data)
-    data <- dataValues$data
+    data <- loadData()
     
-      # Generate the plot or perform other functions
-      
-      # Example: Concordia Diagram
-    data_concordia <- read.data(  data[ , 2:6], ierr = 2,
-                method = 'U-Pb', format = 1 )
-      concordia(data_concordia, type = 1)
+    # Generate the plot or perform other functions
+    
+    # Example: Concordia Diagram
+    data_concordia <- read.data(data[, 2:6], ierr = 2, method = 'U-Pb', format = 1)
+    concordia(data_concordia, type = 1)
+  })
+  
+  # Upper and lower intercept xy plot
+  output$Discordance_plot_upper_lower <- renderPlot({
+    req(reducedData$data) # Wait for the data to be available
+    
+
+   reducedData$data[[1]]
 
   })
   
+  # Summed lower intercept probability plot
+  output$Discordance_plot_lower_summed <- renderPlot({
+    req(reducedData$data) # Wait for the data to be available
+    
 
-  #process data and run discordance data 
-  
-
-    
-    # Generate the plot based on the stored data
-    output$Discordance_plot <- renderPlot({
-      req(dataValues$data)  # Wait for the data to be available
-      
-      Data.raw <- dataValues$data
-  
-    
-    
-  #define variables
-   file_name<- input$data_file$name
-   sample.name 	<- sub(".csv", "", file_name)
-   node.spacing	<- as.numeric(input$node_space) #node spacing from drop down
-   
-   #############################  SWITCHES #############################
-   ## this should be "Y" to normalize the uncertainties to the median value
-   #    otherwise it doesn't do anything
-   normalize.uncertainty	 <- "N"  
-   
-   ## this should be "detrital" to weight against concordant analyses
-   #    otherwise it should be 'single' to not weight against concordant analyses
-   data.type	 <- "single"  
-   
-   ## If cut.data.by.ratios is Y it trim the input data by the cuts below
-   cut.data.by.ratios	<- "N"
-   ## These are the start and ends, in ratio space, this cuts data out of the data file
-   startcut.r75        <- 0
-   endcut.r75          <- 20
-   startcut.r68        <- 0
-   endcut.r68          <- 0.8
-   
-   # This zooms the plots into a certain age window
-   #  		Use this to either simply zoom in on a particular age, or 
-   #  		to zoom in and use a very tight node spacing to save computational time	
-   #       it doesn't perform the analysis outside of the age window defined below
-   zoom.analysis		<- "Y"
-   ## These are the start and ends, only performs the reduction on certain nodes defined
-   #	by the ages below here
-   startcut.age.lower        <- 0 			## Age in M <- a
-   endcut.age.lower          <- 2000		  ## Age in Ma
-   startcut.age.upper        <- 0		## Age in Ma
-   endcut.age.upper          <- 2000		  ## Age in Ma
-   
-   ### Plot limits
-   plot.min.age		<- 0		## Age in Ma
-   plot.max.age		<- 2000		## Age in Ma
-   
-   # ### Plot limits: use to control plotting
-   upperint.plotlimit.min	  	<- 0
-   upperint.plotlimit.max		<- 2000
-   lowerint.plotlimit.min	  	<- 0
-   lowerint.plotlimit.max		<- 2000
-   
-  #set up things from other files in the git hub
-   source( "UPb_Constants_Functions_Libraries.R", local = TRUE )   # Read in constants and functions from the other file
-   source( "fte_theme_plotting.R", local = TRUE  )   	# Read in constants and functions from the other file
-   source( "UPb_Reduction_2023_Rebuild.R" , local = TRUE )  ## do the reduction
-   source( "UPb_Plotting_Exporting_app_source.R" , local = TRUE ) #For the plotting functions
-   
-   
-  
-   if (input$plot_shown == "Max Probability"){
-        return(fig.xyplot())
-     }
-   if (input$plot_shown == "Lower Intercept (summed probability"){
-        return(fig.total.lower.int())
-     }
-   if (input$plot_shown == "Heat Map"){
-        return(fig.2dhist())
-     }
-  
+    reducedData$data[[3]]
   })
-    
   
+  # Heatmap 2d histogram plot
+  output$Discordance_plot_heat_map <- renderPlot({
+   req(reducedData$data) # Wait for the data to be available
+    
+    reducedData$data[[2]]
+
+  })
 }
 
 # Run the Shiny app
 shinyApp(ui = ui, server = server)
+
 
 
 
